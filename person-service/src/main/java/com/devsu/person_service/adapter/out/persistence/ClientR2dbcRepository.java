@@ -7,7 +7,5 @@ import reactor.core.publisher.Mono;
 
 @Repository
 public interface ClientR2dbcRepository extends ReactiveCrudRepository<ClientEntity, Long> {
-    Mono<ClientEntity> findByClientId(String clientId);
-    Mono<Boolean> existsByClientId(String clientId);
-    Mono<Void> deleteByClientId(String clientId);
+    // Standard CRUD operations provided by ReactiveCrudRepository
 }

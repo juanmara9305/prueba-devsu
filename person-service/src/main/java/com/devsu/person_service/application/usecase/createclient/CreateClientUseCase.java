@@ -23,18 +23,9 @@ public class CreateClientUseCase implements CreateClientPort {
                 "Password must be at least 8 characters with 1 lowercase, 1 uppercase, and 1 digit"));
         }
         
-        return clientRepositoryPort.existsByClientId(command.getClient().getClientId())
-            .flatMap(exists -> {
-                if (exists) {
-                    return Mono.error(new ClientAlreadyExistsException(
-                        command.getClient().getClientId(),
-                        "A client with this ID already exists. Please use a different client ID."));
-                }
-                
-                Client client = command.getClient();
-                client.setPassword(passwordHasher.hash(command.getRawPassword()));
-                
-                return clientRepositoryPort.save(client);
-            });
+        Client client = command.getClient();
+        client.setPassword(passwordHasher.hash(command.getRawPassword()));
+        
+        return clientRepositoryPort.save(client);
     }
 }

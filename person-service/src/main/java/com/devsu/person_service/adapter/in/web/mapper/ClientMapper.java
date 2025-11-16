@@ -19,7 +19,7 @@ public class ClientMapper {
         client.setIdentification(request.getIdentification());
         client.setAddress(request.getAddress());
         client.setPhone(request.getPhone());
-        client.setClientId(request.getClientId());
+        // clientId will be auto-generated from database ID, ignore request value
         client.setStatus(request.getStatus());
         return client;
     }
@@ -65,7 +65,6 @@ public class ClientMapper {
     public ClientEntity toClientEntity(Client client) {
         ClientEntity entity = new ClientEntity();
         entity.setPersonId(client.getId());
-        entity.setClientId(client.getClientId());
         entity.setPassword(client.getPassword());
         entity.setStatus(client.getStatus());
         return entity;
@@ -80,7 +79,7 @@ public class ClientMapper {
         client.setIdentification(personEntity.getIdentification());
         client.setAddress(personEntity.getAddress());
         client.setPhone(personEntity.getPhone());
-        client.setClientId(clientEntity.getClientId());
+        client.setClientId(String.valueOf(clientEntity.getId()));
         client.setPassword(clientEntity.getPassword());
         client.setStatus(clientEntity.getStatus());
         return client;

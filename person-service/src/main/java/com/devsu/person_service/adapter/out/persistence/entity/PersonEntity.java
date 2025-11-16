@@ -9,7 +9,7 @@ import org.springframework.data.relational.core.mapping.Table;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-@Table("persons")
+@Table("person")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -26,4 +26,6 @@ public class PersonEntity {
     
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private Boolean deleted;
+    private LocalDateTime deletedAt;
 }

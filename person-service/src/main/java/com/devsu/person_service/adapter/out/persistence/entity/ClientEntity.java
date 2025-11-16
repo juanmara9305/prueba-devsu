@@ -8,18 +8,20 @@ import org.springframework.data.relational.core.mapping.Table;
 
 import java.time.LocalDateTime;
 
-@Table("clients")
+@Table("client")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class ClientEntity {
     @Id
+    private Long id;
+
     private Long personId;
-    
-    private String clientId;
     private String password;
     private Boolean status;
-    
+
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private Boolean deleted;
+    private LocalDateTime deletedAt;
 }
