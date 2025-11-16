@@ -19,7 +19,10 @@ import java.time.LocalDate;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.times;
 
 @ExtendWith(MockitoExtension.class)
 class UpdateClientUseCaseTest {
@@ -94,5 +97,117 @@ class UpdateClientUseCaseTest {
         StepVerifier.create(updateClientUseCase.execute(command))
                 .expectError(InvalidPasswordException.class)
                 .verify();
+    }
+
+    @Test
+    void execute_shouldPublishEventAfterSuccessfulUpdate() {
+        Client existingClient = new Client();
+        existingClient.setId(1L);
+        existingClient.setClientId("CLI001");
+        existingClient.setPassword("oldHashedPassword");
+
+        Client updatedClient = new Client();
+        updatedClient.setClientId("CLI001");
+        updatedClient.setName("John Updated");
+        updatedClient.setGender("Male");
+        updatedClient.setBirthDate(LocalDate.of(1990, 1, 1));
+        updatedClient.setIdentification("1234567890");
+        updatedClient.setAddress("456 New St");
+        updatedClient.setPhone("555-5678");
+        updatedClient.setStatus(true);
+
+        UpdateClientCommand command = new UpdateClientCommand("CLI001", updatedClient, "NewPassword123");
+
+        when(clientRepositoryPort.findByClientId("CLI001")).thenReturn(Mono.just(existingClient));
+        when(passwordHasher.hash("NewPassword123")).thenReturn("newHashedPassword");
+        when(clientRepositoryPort.save(any(Client.class))).thenReturn(Mono.just(updatedClient));
+        when(publishClientEventPort.publish(anyString(), anyString(), anyBoolean(), anyString())).thenReturn(Mono.empty());
+
+        StepVerifier.create(updateClientUseCase.execute(command))
+                .expectNextMatches(result -> result.getClientId().equals("CLI001"))
+                .verifyComplete();
+
+        verify(publishClientEventPort, times(1)).publish(
+                eq("CLI001"),
+                eq("John Updated"),
+                eq(true),
+                eq("CLIENT_UPDATED")
+        );
+    }
+
+    @Test
+    void execute_shouldSucceedEvenIfEventPublishingFails() {
+        Client existingClient = new Client();
+        existingClient.setId(1L);
+        existingClient.setClientId("CLI001");
+        existingClient.setPassword("oldHashedPassword");
+
+        Client updatedClient = new Client();
+        updatedClient.setClientId("CLI001");
+        updatedClient.setName("John Updated");
+        updatedClient.setGender("Male");
+        updatedClient.setBirthDate(LocalDate.of(1990, 1, 1));
+        updatedClient.setIdentification("1234567890");
+        updatedClient.setAddress("456 New St");
+        updatedClient.setPhone("555-5678");
+        updatedClient.setStatus(true);
+
+        UpdateClientCommand command = new UpdateClientCommand("CLI001", updatedClient, "NewPassword123");
+
+        when(clientRepositoryPort.findByClientId("CLI001")).thenReturn(Mono.just(existingClient));
+        when(passwordHasher.hash("NewPassword123")).thenReturn("newHashedPassword");
+        when(clientRepositoryPort.save(any(Client.class))).thenReturn(Mono.just(updatedClient));
+        when(publishClientEventPort.publish(anyString(), anyString(), anyBoolean(), anyString()))
+                .thenReturn(Mono.error(new RuntimeException("RabbitMQ connection failed")));
+
+        StepVerifier.create(updateClientUseCase.execute(command))
+                .expectNextMatches(result -> result.getClientId().equals("CLI001"))
+                .verifyComplete();
+
+        verify(publishClientEventPort, times(1)).publish(
+                eq("CLI001"),
+                eq("John Updated"),
+                eq(true),
+                eq("CLIENT_UPDATED")
+        );
+    }
+
+    @Test
+    void execute_shouldPublishEventWithCorrectClientData() {
+        Client existingClient = new Client();
+        existingClient.setId(1L);
+        existingClient.setClientId("CLI002");
+        existingClient.setPassword("oldHashedPassword");
+
+        Client updatedClient = new Client();
+        updatedClient.setClientId("CLI002");
+        updatedClient.setName("Jane Smith");
+        updatedClient.setGender("Female");
+        updatedClient.setBirthDate(LocalDate.of(1985, 5, 15));
+        updatedClient.setIdentification("9876543210");
+        updatedClient.setAddress("789 Oak Ave");
+        updatedClient.setPhone("555-9999");
+        updatedClient.setStatus(false);
+
+        UpdateClientCommand command = new UpdateClientCommand("CLI002", updatedClient, "SecurePass456");
+
+        when(clientRepositoryPort.findByClientId("CLI002")).thenReturn(Mono.just(existingClient));
+        when(passwordHasher.hash("SecurePass456")).thenReturn("newHashedPassword");
+        when(clientRepositoryPort.save(any(Client.class))).thenReturn(Mono.just(updatedClient));
+        when(publishClientEventPort.publish(anyString(), anyString(), anyBoolean(), anyString())).thenReturn(Mono.empty());
+
+        StepVerifier.create(updateClientUseCase.execute(command))
+                .expectNextMatches(result -> 
+                        result.getClientId().equals("CLI002") &&
+                        result.getName().equals("Jane Smith") &&
+                        result.getStatus().equals(false))
+                .verifyComplete();
+
+        verify(publishClientEventPort, times(1)).publish(
+                eq("CLI002"),
+                eq("Jane Smith"),
+                eq(false),
+                eq("CLIENT_UPDATED")
+        );
     }
 }
