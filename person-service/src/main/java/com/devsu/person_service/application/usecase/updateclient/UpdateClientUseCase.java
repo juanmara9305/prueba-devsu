@@ -6,6 +6,7 @@ import com.devsu.person_service.domain.exception.InvalidPasswordException;
 import com.devsu.person_service.domain.model.Client;
 import com.devsu.person_service.domain.port.in.UpdateClientPort;
 import com.devsu.person_service.domain.port.out.ClientRepositoryPort;
+import com.devsu.person_service.domain.port.out.PublishClientEventPort;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
@@ -15,6 +16,7 @@ import reactor.core.publisher.Mono;
 public class UpdateClientUseCase implements UpdateClientPort {
     private final ClientRepositoryPort clientRepositoryPort;
     private final PasswordHasher passwordHasher;
+    private final PublishClientEventPort publishClientEventPort;
     
     @Override
     public Mono<Client> execute(UpdateClientCommand command) {
@@ -36,6 +38,16 @@ public class UpdateClientUseCase implements UpdateClientPort {
                 command.getClient().setId(existing.getId());
                 
                 return clientRepositoryPort.save(command.getClient());
-            });
+            })
+            .flatMap(savedClient -> 
+                publishClientEventPort.publish(
+                    savedClient.getClientId(),
+                    savedClient.getName(),
+                    savedClient.getStatus(),
+                    "CLIENT_UPDATED"
+                )
+                .onErrorResume(e -> Mono.empty())
+                .thenReturn(savedClient)
+            );
     }
 }

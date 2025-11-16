@@ -5,6 +5,7 @@ import com.devsu.person_service.domain.exception.ClientNotFoundException;
 import com.devsu.person_service.domain.exception.InvalidPasswordException;
 import com.devsu.person_service.domain.model.Client;
 import com.devsu.person_service.domain.port.out.ClientRepositoryPort;
+import com.devsu.person_service.domain.port.out.PublishClientEventPort;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -16,6 +17,8 @@ import reactor.test.StepVerifier;
 import java.time.LocalDate;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -26,6 +29,9 @@ class UpdateClientUseCaseTest {
 
     @Mock
     private PasswordHasher passwordHasher;
+
+    @Mock
+    private PublishClientEventPort publishClientEventPort;
 
     @InjectMocks
     private UpdateClientUseCase updateClientUseCase;
@@ -52,6 +58,7 @@ class UpdateClientUseCaseTest {
         when(clientRepositoryPort.findByClientId("CLI001")).thenReturn(Mono.just(existingClient));
         when(passwordHasher.hash("NewPassword123")).thenReturn("newHashedPassword");
         when(clientRepositoryPort.save(any(Client.class))).thenReturn(Mono.just(updatedClient));
+        when(publishClientEventPort.publish(anyString(), anyString(), anyBoolean(), anyString())).thenReturn(Mono.empty());
 
         StepVerifier.create(updateClientUseCase.execute(command))
                 .expectNextMatches(result -> result.getClientId().equals("CLI001"))
