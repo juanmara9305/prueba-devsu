@@ -19,14 +19,22 @@ public class AccountRepositoryAdapter implements AccountRepositoryPort {
     
     @Override
     public Mono<Account> save(Account account) {
-        AccountEntity entity = mapper.toEntity(account);
-        if (entity.getId() == null) {
+        if (account.getId() != null) {
+            return repository.findById(account.getId())
+                .flatMap(existingEntity -> {
+                    AccountEntity entity = mapper.toEntity(account);
+                    entity.setCreatedAt(existingEntity.getCreatedAt());
+                    entity.setUpdatedAt(LocalDateTime.now());
+                    return repository.save(entity);
+                })
+                .map(mapper::toDomain);
+        } else {
+            AccountEntity entity = mapper.toEntity(account);
             entity.setCreatedAt(LocalDateTime.now());
+            entity.setUpdatedAt(LocalDateTime.now());
+            return repository.save(entity)
+                .map(mapper::toDomain);
         }
-        entity.setUpdatedAt(LocalDateTime.now());
-        
-        return repository.save(entity)
-            .map(mapper::toDomain);
     }
     
     @Override

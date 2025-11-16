@@ -42,6 +42,9 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'io.projectreactor:reactor-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+	testRuntimeOnly 'com.h2database:h2'
+	testRuntimeOnly 'io.r2dbc:r2dbc-h2'
+	testImplementation 'org.flywaydb:flyway-core'
 }
 
 tasks.named('test') {

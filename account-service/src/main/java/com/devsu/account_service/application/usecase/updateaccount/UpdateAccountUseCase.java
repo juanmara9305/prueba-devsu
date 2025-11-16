@@ -20,8 +20,12 @@ public class UpdateAccountUseCase implements UpdateAccountPort {
                 command.getAccountNumber(),
                 "Account not found")))
             .flatMap(existingAccount -> {
-                existingAccount.setAccountType(command.getAccount().getAccountType());
-                existingAccount.setStatus(command.getAccount().getStatus());
+                if (command.getAccount().getAccountType() != null) {
+                    existingAccount.setAccountType(command.getAccount().getAccountType());
+                }
+                if (command.getAccount().getStatus() != null) {
+                    existingAccount.setStatus(command.getAccount().getStatus());
+                }
                 return accountRepositoryPort.save(existingAccount);
             });
     }

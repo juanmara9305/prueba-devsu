@@ -19,14 +19,22 @@ public class TransactionRepositoryAdapter implements TransactionRepositoryPort {
     
     @Override
     public Mono<Transaction> save(Transaction transaction) {
-        TransactionEntity entity = mapper.toEntity(transaction);
-        if (entity.getId() == null) {
+        if (transaction.getId() != null) {
+            return repository.findById(transaction.getId())
+                .flatMap(existingEntity -> {
+                    TransactionEntity entity = mapper.toEntity(transaction);
+                    entity.setCreatedAt(existingEntity.getCreatedAt());
+                    entity.setUpdatedAt(LocalDateTime.now());
+                    return repository.save(entity);
+                })
+                .map(mapper::toDomain);
+        } else {
+            TransactionEntity entity = mapper.toEntity(transaction);
             entity.setCreatedAt(LocalDateTime.now());
+            entity.setUpdatedAt(LocalDateTime.now());
+            return repository.save(entity)
+                .map(mapper::toDomain);
         }
-        entity.setUpdatedAt(LocalDateTime.now());
-        
-        return repository.save(entity)
-            .map(mapper::toDomain);
     }
     
     @Override
