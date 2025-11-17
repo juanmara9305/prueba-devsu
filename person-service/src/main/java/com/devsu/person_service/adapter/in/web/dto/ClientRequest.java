@@ -33,9 +33,6 @@ public class ClientRequest {
     @NotBlank(message = "Phone is required")
     private String phone;
     
-    @NotBlank(message = "Client ID is required")
-    private String clientId;
-    
     @NotBlank(message = "Password is required")
     @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,}$", 
              message = "Password must be at least 8 characters with 1 lowercase, 1 uppercase, and 1 digit")

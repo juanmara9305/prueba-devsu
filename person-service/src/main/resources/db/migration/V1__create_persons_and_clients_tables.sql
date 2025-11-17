@@ -3,7 +3,7 @@ CREATE TABLE person (
     name VARCHAR(255) NOT NULL,
     gender VARCHAR(50) NOT NULL,
     birth_date DATE NOT NULL,
-    identification VARCHAR(100) NOT NULL,
+    identification VARCHAR(100) UNIQUE NOT NULL,
     address VARCHAR(500) NOT NULL,
     phone VARCHAR(50) NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,

@@ -1,9 +1,143 @@
 services:
+  # RabbitMQ Message Broker
   rabbitmq:
     image: 'rabbitmq:3-management'
+    container_name: rabbitmq
     environment:
       - 'RABBITMQ_DEFAULT_USER=guest'
       - 'RABBITMQ_DEFAULT_PASS=guest'
     ports:
       - '5672:5672'
       - '15672:15672'
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - microservices-network
+
+  # PostgreSQL for person-service
+  person-db:
+    image: 'postgres:16-alpine'
+    container_name: person-db
+    environment:
+      - 'POSTGRES_DB=mydatabase'
+      - 'POSTGRES_USER=myuser'
+      - 'POSTGRES_PASSWORD=secret'
+    ports:
+      - '5433:5432'
+    volumes:
+      - person-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U myuser -d mydatabase"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - microservices-network
+
+  # PostgreSQL for account-service
+  account-db:
+    image: 'postgres:16-alpine'
+    container_name: account-db
+    environment:
+      - 'POSTGRES_DB=accountdb'
+      - 'POSTGRES_USER=postgres'
+      - 'POSTGRES_PASSWORD=postgres'
+    ports:
+      - '5432:5432'
+    volumes:
+      - account-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d accountdb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - microservices-network
+
+  # Person Service
+  person-service:
+    build:
+      context: ./person-service
+      dockerfile: Dockerfile
+    container_name: person-service
+    environment:
+      - 'SPRING_R2DBC_URL=r2dbc:postgresql://person-db:5432/mydatabase'
+      - 'SPRING_R2DBC_USERNAME=myuser'
+      - 'SPRING_R2DBC_PASSWORD=secret'
+      - 'SPRING_FLYWAY_URL=jdbc:postgresql://person-db:5432/mydatabase'
+      - 'SPRING_FLYWAY_USER=myuser'
+      - 'SPRING_FLYWAY_PASSWORD=secret'
+      - 'SPRING_RABBITMQ_HOST=rabbitmq'
+      - 'SPRING_RABBITMQ_PORT=5672'
+      - 'SPRING_RABBITMQ_USERNAME=guest'
+      - 'SPRING_RABBITMQ_PASSWORD=guest'
+      - 'SERVER_PORT=8082'
+    ports:
+      - '8082:8082'
+    depends_on:
+      person-db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - microservices-network
+    restart: unless-stopped
+
+  # Account Service
+  account-service:
+    build:
+      context: ./account-service
+      dockerfile: Dockerfile
+    container_name: account-service
+    environment:
+      - 'SPRING_R2DBC_URL=r2dbc:postgresql://account-db:5432/accountdb'
+      - 'SPRING_R2DBC_USERNAME=postgres'
+      - 'SPRING_R2DBC_PASSWORD=postgres'
+      - 'SPRING_FLYWAY_URL=jdbc:postgresql://account-db:5432/accountdb'
+      - 'SPRING_FLYWAY_USER=postgres'
+      - 'SPRING_FLYWAY_PASSWORD=postgres'
+      - 'SPRING_RABBITMQ_HOST=rabbitmq'
+      - 'SPRING_RABBITMQ_PORT=5672'
+      - 'SPRING_RABBITMQ_USERNAME=guest'
+      - 'SPRING_RABBITMQ_PASSWORD=guest'
+      - 'SERVER_PORT=8081'
+    ports:
+      - '8081:8081'
+    depends_on:
+      account-db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - microservices-network
+    restart: unless-stopped
+
+  # API Gateway
+  gateway:
+    build:
+      context: ./gateway
+      dockerfile: Dockerfile
+    container_name: gateway
+    environment:
+      - 'SERVER_PORT=8080'
+      - 'SERVICE_PERSON_URL=http://person-service:8082'
+      - 'SERVICE_ACCOUNT_URL=http://account-service:8081'
+    ports:
+      - '8080:8080'
+    depends_on:
+      - person-service
+      - account-service
+    networks:
+      - microservices-network
+    restart: unless-stopped
+
+networks:
+  microservices-network:
+    driver: bridge
+
+volumes:
+  person-db-data:
+  account-db-data:

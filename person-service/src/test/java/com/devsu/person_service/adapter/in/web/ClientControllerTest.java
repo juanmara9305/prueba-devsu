@@ -67,7 +67,6 @@ class ClientControllerTest {
         request.setIdentification("1234567890");
         request.setAddress("123 Main St");
         request.setPhone("555-1234");
-        request.setClientId("1");
         request.setPassword("Password123");
         request.setStatus(true);
 
@@ -102,7 +101,6 @@ class ClientControllerTest {
         request.setIdentification("1234567890");
         request.setAddress("123 Main St");
         request.setPhone("555-1234");
-        request.setClientId("1");
         request.setPassword("weak");
         request.setStatus(true);
 
@@ -190,7 +188,6 @@ class ClientControllerTest {
         request.setIdentification("1234567890");
         request.setAddress("456 New St");
         request.setPhone("555-5678");
-        request.setClientId("1");
         request.setPassword("NewPassword123");
         request.setStatus(true);
 

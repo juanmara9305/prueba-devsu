@@ -17,20 +17,20 @@ public class GatewayApplication {
 	public RouteLocator customRouteLocator(RouteLocatorBuilder builder) {
 		return builder.routes()
 			// Route for person-service: Client operations
-			.route("person_service_route", r -> r.path("/api/clientes/**")
-				.uri("http://localhost:8082"))
+			.route("person_service_route", r -> r.path("/clientes/**")
+				.uri("http://person-service:8082"))
 			
 			// Route for account-service: Account operations
-			.route("account_service_accounts_route", r -> r.path("/api/cuentas/**")
-				.uri("http://localhost:8081"))
+			.route("account_service_accounts_route", r -> r.path("/cuentas/**")
+				.uri("http://account-service:8081"))
 			
 			// Route for account-service: Transaction operations
-			.route("account_service_transactions_route", r -> r.path("/api/movimientos/**")
-				.uri("http://localhost:8081"))
+			.route("account_service_transactions_route", r -> r.path("/movimientos/**")
+				.uri("http://account-service:8081"))
 			
 			// Route for account-service: Report operations
-			.route("account_service_reports_route", r -> r.path("/api/reportes/**")
-				.uri("http://localhost:8081"))
+			.route("account_service_reports_route", r -> r.path("/reportes/**")
+				.uri("http://account-service:8081"))
 			
 			.build();
 	}
