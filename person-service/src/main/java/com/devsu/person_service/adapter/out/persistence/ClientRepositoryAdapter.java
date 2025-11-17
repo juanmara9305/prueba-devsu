@@ -1,5 +1,6 @@
 package com.devsu.person_service.adapter.out.persistence;
 
+import com.devsu.person_service.adapter.in.web.mapper.ClientMapper;
 import com.devsu.person_service.adapter.out.persistence.entity.ClientEntity;
 import com.devsu.person_service.adapter.out.persistence.entity.PersonEntity;
 import com.devsu.person_service.domain.model.Client;
@@ -17,11 +18,12 @@ import java.time.LocalDateTime;
 public class ClientRepositoryAdapter implements ClientRepositoryPort {
     private final PersonR2dbcRepository personRepository;
     private final ClientR2dbcRepository clientRepository;
+    private final ClientMapper mapper;
     
     @Override
     @Transactional
     public Mono<Client> save(Client client) {
-        PersonEntity personEntity = toPersonEntity(client);
+        PersonEntity personEntity = mapper.toPersonEntity(client);
         LocalDateTime now = LocalDateTime.now();
         
         if (client.getId() == null) {
@@ -40,7 +42,7 @@ public class ClientRepositoryAdapter implements ClientRepositoryPort {
                     clientEntity.setDeleted(false);
                     
                     return clientRepository.save(clientEntity)
-                        .map(savedClient -> toDomain(savedPerson, savedClient));
+                        .map(savedClient -> mapper.toDomain(savedPerson, savedClient));
                 });
         } else {
             return personRepository.findById(client.getId())
@@ -63,7 +65,7 @@ public class ClientRepositoryAdapter implements ClientRepositoryPort {
                                     
                                     return clientRepository.save(existingClient);
                                 })
-                                .map(savedClient -> toDomain(savedPerson, savedClient));
+                                .map(savedClient -> mapper.toDomain(savedPerson, savedClient));
                         });
                 });
         }
@@ -76,7 +78,7 @@ public class ClientRepositoryAdapter implements ClientRepositoryPort {
             .flatMap(clientEntity -> 
                 personRepository.findById(clientEntity.getPersonId())
                     .filter(personEntity -> !Boolean.TRUE.equals(personEntity.getDeleted()))
-                    .map(personEntity -> toDomain(personEntity, clientEntity))
+                    .map(personEntity -> mapper.toDomain(personEntity, clientEntity))
             );
     }
     
@@ -87,7 +89,7 @@ public class ClientRepositoryAdapter implements ClientRepositoryPort {
             .flatMap(clientEntity -> 
                 personRepository.findById(clientEntity.getPersonId())
                     .filter(personEntity -> !Boolean.TRUE.equals(personEntity.getDeleted()))
-                    .map(personEntity -> toDomain(personEntity, clientEntity))
+                    .map(personEntity -> mapper.toDomain(personEntity, clientEntity))
             );
     }
     
@@ -107,40 +109,5 @@ public class ClientRepositoryAdapter implements ClientRepositoryPort {
                 clientRepository.deleteById(Long.parseLong(clientId))
                     .then(personRepository.deleteById(clientEntity.getPersonId()))
             );
-    }
-    
-    private PersonEntity toPersonEntity(Client client) {
-        PersonEntity entity = new PersonEntity();
-        entity.setId(client.getId());
-        entity.setName(client.getName());
-        entity.setGender(client.getGender());
-        entity.setBirthDate(client.getBirthDate());
-        entity.setIdentification(client.getIdentification());
-        entity.setAddress(client.getAddress());
-        entity.setPhone(client.getPhone());
-        return entity;
-    }
-    
-    private ClientEntity toClientEntity(Client client) {
-        ClientEntity entity = new ClientEntity();
-        entity.setPersonId(client.getId());
-        entity.setPassword(client.getPassword());
-        entity.setStatus(client.getStatus());
-        return entity;
-    }
-    
-    private Client toDomain(PersonEntity personEntity, ClientEntity clientEntity) {
-        Client client = new Client();
-        client.setId(personEntity.getId());
-        client.setName(personEntity.getName());
-        client.setGender(personEntity.getGender());
-        client.setBirthDate(personEntity.getBirthDate());
-        client.setIdentification(personEntity.getIdentification());
-        client.setAddress(personEntity.getAddress());
-        client.setPhone(personEntity.getPhone());
-        client.setClientId(String.valueOf(clientEntity.getId()));
-        client.setPassword(clientEntity.getPassword());
-        client.setStatus(clientEntity.getStatus());
-        return client;
     }
 }

@@ -172,15 +172,15 @@ Once running, access the services at:
 curl -X POST http://localhost:8080/clientes \
   -H "Content-Type: application/json" \
   -d '{
-    "nombre": "Juan Perez",
-    "genero": "Masculino",
-    "edad": 30,
-    "identificacion": "12345678",
-    "direccion": "Calle 123",
-    "telefono": "555-1234",
-    "contrasena": "password123",
-    "estado": true
-  }'
+    "name": "Pedro Rey",
+    "gender": "male",
+    "birthDate": "1997-04-28",
+    "identification": "11111111",
+    "address": "Cra 22 # 98 - 67",
+    "password": "@Pedro1234",
+    "phone": "3172839232",
+    "status": true
+}'
 
 # Get all clients
 curl http://localhost:8080/clientes
@@ -189,11 +189,14 @@ curl http://localhost:8080/clientes
 curl -X POST http://localhost:8080/cuentas \
   -H "Content-Type: application/json" \
   -d '{
-    "numeroCuenta": "123456",
-    "tipoCuenta": "Ahorros",
-    "saldoInicial": 1000.00,
-    "clienteId": 1
-  }'
+    "accountNumber": "ACC-000222",
+    "accountType": "AHORROS",
+    "initialBalance": 2000,
+    "status": true,
+    "clientId": "2",
+    "clientName": "Julian Martinez Rangel",
+    "clientStatus": true
+}'
 ```
 
 ## Development

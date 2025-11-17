@@ -8,6 +8,4 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableR2dbcRepositories(basePackages = "com.devsu.person_service.adapter.out.persistence")
 @EnableTransactionManagement
 public class R2dbcConfiguration {
-    // Transaction management is automatically configured by Spring Boot
-    // This class explicitly enables it for clarity
 }

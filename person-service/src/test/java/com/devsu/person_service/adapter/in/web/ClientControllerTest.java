@@ -28,7 +28,6 @@ import reactor.core.publisher.Mono;
 import java.time.LocalDate;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 @WebFluxTest(ClientController.class)

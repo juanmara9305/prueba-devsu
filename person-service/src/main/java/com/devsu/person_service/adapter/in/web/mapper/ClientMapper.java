@@ -19,7 +19,6 @@ public class ClientMapper {
         client.setIdentification(request.getIdentification());
         client.setAddress(request.getAddress());
         client.setPhone(request.getPhone());
-        // clientId will be auto-generated from database ID, ignore request value
         client.setStatus(request.getStatus());
         return client;
     }
