@@ -9,5 +9,6 @@ public interface ClientRepositoryPort {
     Flux<Client> findAll();
     Mono<Client> findByClientId(String clientId);
     Mono<Boolean> existsByClientId(String clientId);
+    Mono<Boolean> existsByIdentification(String identification);
     Mono<Void> deleteByClientId(String clientId);
 }

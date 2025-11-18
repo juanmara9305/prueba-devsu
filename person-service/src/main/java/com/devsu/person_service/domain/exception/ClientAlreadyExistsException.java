@@ -4,12 +4,12 @@ import lombok.Getter;
 
 @Getter
 public class ClientAlreadyExistsException extends RuntimeException {
-    private final String clientId;
+    private final String identification;
     private final String nextSteps;
     
-    public ClientAlreadyExistsException(String clientId, String message) {
+    public ClientAlreadyExistsException(String identification, String message) {
         super(message);
-        this.clientId = clientId;
-        this.nextSteps = "Please use a different client ID or retrieve the existing client.";
+        this.identification = identification;
+        this.nextSteps = "Please use a different identification or retrieve the existing client.";
     }
 }

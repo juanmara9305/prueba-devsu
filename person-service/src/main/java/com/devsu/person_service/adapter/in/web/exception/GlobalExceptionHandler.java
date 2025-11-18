@@ -42,7 +42,7 @@ public class GlobalExceptionHandler {
     public Mono<ResponseEntity<ErrorResponse>> handleConflict(
             ClientAlreadyExistsException ex, 
             ServerWebExchange exchange) {
-        log.error("Client already exists: {}", ex.getClientId(), ex);
+        log.error("Client already exists with identification: {}", ex.getIdentification(), ex);
         
         ErrorResponse error = ErrorResponse.builder()
             .timestamp(LocalDateTime.now())

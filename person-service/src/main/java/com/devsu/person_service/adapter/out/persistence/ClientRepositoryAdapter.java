@@ -101,6 +101,13 @@ public class ClientRepositoryAdapter implements ClientRepositoryPort {
     }
     
     @Override
+    public Mono<Boolean> existsByIdentification(String identification) {
+        return personRepository.findByIdentification(identification)
+            .filter(personEntity -> !Boolean.TRUE.equals(personEntity.getDeleted()))
+            .hasElement();
+    }
+    
+    @Override
     @Transactional
     public Mono<Void> deleteByClientId(String clientId) {
         return clientRepository.findById(Long.parseLong(clientId))

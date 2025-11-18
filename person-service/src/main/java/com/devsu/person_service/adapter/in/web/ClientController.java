@@ -7,6 +7,8 @@ import com.devsu.person_service.adapter.in.web.mapper.ClientMapper;
 import com.devsu.person_service.application.usecase.createclient.CreateClientCommand;
 import com.devsu.person_service.application.usecase.patchclient.PatchClientCommand;
 import com.devsu.person_service.application.usecase.updateclient.UpdateClientCommand;
+import com.devsu.person_service.domain.exception.ClientAlreadyExistsException;
+import com.devsu.person_service.domain.exception.InvalidPasswordException;
 import com.devsu.person_service.domain.model.Client;
 import com.devsu.person_service.domain.port.in.CreateClientPort;
 import com.devsu.person_service.domain.port.in.DeleteClientPort;
